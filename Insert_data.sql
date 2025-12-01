@@ -1,7 +1,10 @@
 -- =========================
 -- Departments
 -- =========================
-INSERT INTO Department(dept_name) VALUES ('Computer Science'), ('Mathematics');
+INSERT INTO Department (dept_identifier, dept_name) 
+VALUES 
+  (1, 'Computer Science'),
+  (2, 'Mathematics');
 
 -- =========================
 -- Persons
@@ -26,13 +29,13 @@ INSERT INTO job_title(job_title_id, job_title) VALUES
 -- =========================
 -- Employees
 -- =========================
-INSERT INTO Employee(employee_id, personal_number, job_title_id, salary, dept_identifier) VALUES
-(500001,'PN900001',1,550000,1),
-(500004,'PN900004',2,480000,1),
-(500009,'PN900009',2,440000,1),
-(500010,'PN900010',3,240000,1),
-(500011,'PN900011',4,200000,1),
-(500100,'PN901000',2,420000,1);
+INSERT INTO Employee(employee_id, personal_number, job_title_id, salary, dept_identifier, email) VALUES
+(500001, 'PN900001', 1, 550000, 1, 'paris.carbone@example.com'),
+(500004, 'PN900004', 2, 480000, 1, 'leif.lindback@example.com'),
+(500009, 'PN900009', 2, 440000, 1, 'niharika.gauraha@example.com'),
+(500010, 'PN900010', 3, 240000, 1, 'brian.karlsson@example.com'),
+(500011, 'PN900011', 4, 200000, 1, 'adam.west@example.com'),
+(500100, 'PN901000', 2, 420000, 1, 'test.teacher@example.com');
 
 -- =========================
 -- Update Department Managers
@@ -50,11 +53,11 @@ INSERT INTO CourseLayout(course_code, hp, course_name, min_students, max_student
 -- =========================
 -- Course Instances
 -- =========================
-INSERT INTO CourseInstance(courselayout_id, study_period, year, num_students) VALUES
-((SELECT courselayout_id FROM CourseLayout WHERE course_code='IV1351'),'P2',2025,200),
-((SELECT courselayout_id FROM CourseLayout WHERE course_code='IX1500'),'P1',2025,150),
-((SELECT courselayout_id FROM CourseLayout WHERE course_code='IV1351'),'P1',2025,50),
-((SELECT courselayout_id FROM CourseLayout WHERE course_code='IX1500'),'P2',2025,40);
+INSERT INTO CourseInstance(courselayout_id, course_code, study_period, year, version_number, num_students) VALUES
+((SELECT courselayout_id FROM CourseLayout WHERE course_code='IV1351'),'IV1351','P2',2025,1,200),
+((SELECT courselayout_id FROM CourseLayout WHERE course_code='IX1500'),'IX1500','P1',2025,1,150),
+((SELECT courselayout_id FROM CourseLayout WHERE course_code='IV1351'),'IV1351','P1',2025,1,50),
+((SELECT courselayout_id FROM CourseLayout WHERE course_code='IX1500'),'IX1500','P2',2025,1,40);
 
 -- =========================
 -- Activity Types
@@ -98,79 +101,89 @@ JOIN ActivityType at ON vals.name = at.activity_name
 WHERE ci.study_period='P1' AND ci.year=2025 AND ci.courselayout_id = (SELECT courselayout_id FROM CourseLayout WHERE course_code='IX1500');
 
 -- =========================
--- Allocations
+-- Allocations (without activitytype_id)
 -- =========================
+
 -- IV1351 P2 Lecture
-INSERT INTO Allocation(employee_id, courseinstance_id, activitytype_id, hoursallocated)
-SELECT 500001, ci.courseinstance_id, at.activitytype_id, 20
+INSERT INTO Allocation(employee_id, courseinstance_id, hoursallocated)
+SELECT 500001, ci.courseinstance_id, 20
 FROM CourseInstance ci
-JOIN ActivityType at ON at.activity_name='Lecture'
-WHERE ci.study_period='P2' AND ci.year=2025 AND ci.courselayout_id = (SELECT courselayout_id FROM CourseLayout WHERE course_code='IV1351')
+WHERE ci.study_period='P2' 
+  AND ci.year=2025 
+  AND ci.courselayout_id = (SELECT courselayout_id FROM CourseLayout WHERE course_code='IV1351')
 LIMIT 1;
 
 -- IV1351 P2 Seminar
-INSERT INTO Allocation(employee_id, courseinstance_id, activitytype_id, hoursallocated)
-SELECT e_id, ci.courseinstance_id, at.activitytype_id, 64
+INSERT INTO Allocation(employee_id, courseinstance_id, hoursallocated)
+SELECT e_id, ci.courseinstance_id, 64
 FROM CourseInstance ci
-JOIN ActivityType at ON at.activity_name='Seminar'
 JOIN (VALUES (500004), (500009)) AS emp(e_id) ON TRUE
-WHERE ci.study_period='P2' AND ci.year=2025 AND ci.courselayout_id = (SELECT courselayout_id FROM CourseLayout WHERE course_code='IV1351');
+WHERE ci.study_period='P2' 
+  AND ci.year=2025 
+  AND ci.courselayout_id = (SELECT courselayout_id FROM CourseLayout WHERE course_code='IV1351');
 
 -- IV1351 P2 Lab
-INSERT INTO Allocation(employee_id, courseinstance_id, activitytype_id, hoursallocated)
-SELECT 500010, ci.courseinstance_id, at.activitytype_id, 50
+INSERT INTO Allocation(employee_id, courseinstance_id, hoursallocated)
+SELECT 500010, ci.courseinstance_id, 50
 FROM CourseInstance ci
-JOIN ActivityType at ON at.activity_name='Lab'
-WHERE ci.study_period='P2' AND ci.year=2025 AND ci.courselayout_id = (SELECT courselayout_id FROM CourseLayout WHERE course_code='IV1351');
+WHERE ci.study_period='P2' 
+  AND ci.year=2025 
+  AND ci.courselayout_id = (SELECT courselayout_id FROM CourseLayout WHERE course_code='IV1351');
 
 -- IV1351 P2 Tutorial
-INSERT INTO Allocation(employee_id, courseinstance_id, activitytype_id, hoursallocated)
-SELECT 500011, ci.courseinstance_id, at.activitytype_id, 50
+INSERT INTO Allocation(employee_id, courseinstance_id, hoursallocated)
+SELECT 500011, ci.courseinstance_id, 50
 FROM CourseInstance ci
-JOIN ActivityType at ON at.activity_name='Tutorial'
-WHERE ci.study_period='P2' AND ci.year=2025 AND ci.courselayout_id = (SELECT courselayout_id FROM CourseLayout WHERE course_code='IV1351');
+WHERE ci.study_period='P2' 
+  AND ci.year=2025 
+  AND ci.courselayout_id = (SELECT courselayout_id FROM CourseLayout WHERE course_code='IV1351');
 
 -- IX1500 P1 Lecture
-INSERT INTO Allocation(employee_id, courseinstance_id, activitytype_id, hoursallocated)
-SELECT 500009, ci.courseinstance_id, at.activitytype_id, 44
+INSERT INTO Allocation(employee_id, courseinstance_id, hoursallocated)
+SELECT 500009, ci.courseinstance_id, 44
 FROM CourseInstance ci
-JOIN ActivityType at ON at.activity_name='Lecture'
-WHERE ci.study_period='P1' AND ci.year=2025 AND ci.courselayout_id = (SELECT courselayout_id FROM CourseLayout WHERE course_code='IX1500');
+WHERE ci.study_period='P1' 
+  AND ci.year=2025 
+  AND ci.courselayout_id = (SELECT courselayout_id FROM CourseLayout WHERE course_code='IX1500');
 
 -- Dummy allocations for testing overload
-INSERT INTO Allocation(employee_id, courseinstance_id, activitytype_id, hoursallocated)
-SELECT 500100, ci.courseinstance_id, at.activitytype_id, 10
+INSERT INTO Allocation(employee_id, courseinstance_id, hoursallocated)
+SELECT 500100, ci.courseinstance_id, 10
 FROM CourseInstance ci
 WHERE ci.year=2025
 ORDER BY ci.courseinstance_id
 LIMIT 4;
 
+
 -- =========================
--- Materialized Views
+-- Materialized Views 
 -- =========================
+
+
+
+-- Teacher yearly load
 CREATE MATERIALIZED VIEW IF NOT EXISTS mv_teacher_yearly_load AS
 SELECT
-e.employee_id,
-p.first_name || ' ' || p.last_name AS teacher_name,
-ci.year,
-SUM(a.hoursallocated * at.factor) AS total_weighted_hours
+    e.employee_id,
+    p.first_name || ' ' || p.last_name AS teacher_name,
+    ci.year,
+    SUM(a.hoursallocated) AS total_hours
 FROM Allocation a
 JOIN Employee e ON a.employee_id = e.employee_id
 JOIN Person p ON e.personal_number = p.personal_number
 JOIN CourseInstance ci ON a.courseinstance_id = ci.courseinstance_id
-JOIN ActivityType at ON a.activitytype_id = at.activitytype_id
 GROUP BY e.employee_id, teacher_name, ci.year;
 
+-- Course cost per instance
 CREATE MATERIALIZED VIEW IF NOT EXISTS mv_course_cost AS
 SELECT
-ci.courseinstance_id,
-cl.course_code,
-ci.study_period,
-ci.year,
-ROUND(SUM((e.salary / 160.0) * (a.hoursallocated * at.factor)), 2) AS total_cost_sek
+    ci.courseinstance_id,
+    cl.course_code,
+    ci.study_period,
+    ci.year,
+    ROUND(SUM((e.salary / 160.0) * a.hoursallocated), 2) AS total_cost_sek
 FROM Allocation a
 JOIN Employee e ON a.employee_id = e.employee_id
 JOIN CourseInstance ci ON a.courseinstance_id = ci.courseinstance_id
 JOIN CourseLayout cl ON ci.courselayout_id = cl.courselayout_id
-JOIN ActivityType at ON a.activitytype_id = at.activitytype_id
 GROUP BY ci.courseinstance_id, cl.course_code, ci.study_period, ci.year;
