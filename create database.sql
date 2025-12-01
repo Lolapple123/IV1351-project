@@ -26,6 +26,12 @@ CREATE TABLE Person (
     address         VARCHAR(50),
     personal_number VARCHAR(20) NOT NULL UNIQUE
 );
+
+-- ==========================================================
+-- job_title
+-- ==========================================================
+Create TABLE job_title (
+    job_title        VARCHAR(30) NOT NULL 
 -- ==========================================================
 -- Employee
 -- ==========================================================
@@ -37,6 +43,7 @@ CREATE TABLE Employee (
     dept_identifier  INT REFERENCES Department(dept_identifier),
     job_title        VARCHAR(50),
     personal_number  INT REFERENCES Person(personal_number)
+    job_title        INT REFERENCES job_title(job_title_ID)
 );
 
 -- Add manager_id foreign key now that Employee exists
@@ -96,8 +103,8 @@ CREATE TABLE Allocation (
     employee_id       INT REFERENCES Employee(employ_id),
     hoursallocated    NUMERIC(10,2) CHECK (hoursallocated >= 0),
     courseinstance_id INT REFERENCES CourseInstance(courseinstance_id),
-    activitytype_id   INT REFERENCES ActivityType(activitytype_id)
 );
+
 -- ==========================================================
 -- END OF SCRIPT
 -- ==========================================================
