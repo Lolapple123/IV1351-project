@@ -30,12 +30,12 @@ INSERT INTO job_title(job_title_id, job_title) VALUES
 -- Employees
 -- =========================
 INSERT INTO Employee(employee_id, personal_number, job_title_id, salary, dept_identifier, email) VALUES
-(500001, 'PN900001', 1, 550000, 1, '[paris.carbone@example.com](mailto:paris.carbone@example.com)'),
-(500004, 'PN900004', 2, 480000, 1, '[leif.lindback@example.com](mailto:leif.lindback@example.com)'),
-(500009, 'PN900009', 2, 440000, 1, '[niharika.gauraha@example.com](mailto:niharika.gauraha@example.com)'),
-(500010, 'PN900010', 3, 240000, 1, '[brian.karlsson@example.com](mailto:brian.karlsson@example.com)'),
-(500011, 'PN900011', 4, 200000, 1, '[adam.west@example.com](mailto:adam.west@example.com)'),
-(500100, 'PN901000', 2, 420000, 1, '[test.teacher@example.com](mailto:test.teacher@example.com)');
+(500001, 'PN900001', 1, 55000, 1, '[paris.carbone@example.com](mailto:paris.carbone@example.com)'),
+(500004, 'PN900004', 2, 48000, 1, '[leif.lindback@example.com](mailto:leif.lindback@example.com)'),
+(500009, 'PN900009', 2, 44000, 1, '[niharika.gauraha@example.com](mailto:niharika.gauraha@example.com)'),
+(500010, 'PN900010', 3, 24000, 1, '[brian.karlsson@example.com](mailto:brian.karlsson@example.com)'),
+(500011, 'PN900011', 4, 20000, 1, '[adam.west@example.com](mailto:adam.west@example.com)'),
+(500100, 'PN901000', 2, 42000, 1, '[test.teacher@example.com](mailto:test.teacher@example.com)');
 
 -- =========================
 -- Update Department Managers
