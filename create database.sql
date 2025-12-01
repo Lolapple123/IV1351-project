@@ -12,7 +12,7 @@ DROP TABLE IF EXISTS Department CASCADE;
 -- ==========================================================
 CREATE TABLE Department (
     dept_identifier SERIAL PRIMARY KEY,
-    dept_name       VARCHAR(15) NOT NULL UNIQUE
+    dept_name       VARCHAR(50) NOT NULL UNIQUE
 );
 
 -- ==========================================================
