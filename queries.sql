@@ -78,16 +78,19 @@ ORDER BY "Total Hours" DESC, "Teacher's Name";
 
 --fourth
 
-SELECT e.employee_id,
-       p.first_name || ' ' || p.last_name AS employee_name,
-       COUNT(DISTINCT a.courseinstance_id) AS course_count
-FROM Employee e
+SELECT
+e.employee_id AS "Employment ID",
+CONCAT(p.first_name, ' ', p.last_name) AS "Teacher's Name",
+ci.study_period AS "Period",
+COUNT(DISTINCT ci.courseinstance_id) AS "No of courses"
+FROM Allocation al
+JOIN Employee e ON al.employee_id = e.employee_id
 JOIN Person p ON e.personal_number = p.personal_number
-JOIN Allocation a ON e.employee_id = a.employee_id
-JOIN CourseInstance ci ON a.courseinstance_id = ci.courseinstance_id
-WHERE ci.study_period = 'P1'   -- replace with your current period
-GROUP BY e.employee_id, p.first_name, p.last_name
-HAVING COUNT(DISTINCT a.courseinstance_id) > 4;  -- replace 4 with your threshold
+JOIN CourseInstance ci ON al.courseinstance_id = ci.courseinstance_id
+WHERE ci.year = 2025
+GROUP BY e.employee_id, p.first_name, p.last_name, ci.study_period
+HAVING COUNT(DISTINCT ci.courseinstance_id) > 1   -- replace 1 with the threshold you want
+ORDER BY "No of courses" DESC, "Teacher's Name";
 
 
 
