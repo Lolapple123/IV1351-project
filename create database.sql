@@ -1,11 +1,14 @@
+-- Ta bort tabeller (om de finns) i rätt ordning
 DROP TABLE IF EXISTS Allocation CASCADE;
 DROP TABLE IF EXISTS PlannedActivity CASCADE;
 DROP TABLE IF EXISTS ActivityType CASCADE;
 DROP TABLE IF EXISTS CourseInstance CASCADE;
 DROP TABLE IF EXISTS CourseLayout CASCADE;
 DROP TABLE IF EXISTS Employee CASCADE;
+DROP TABLE IF EXISTS job_title CASCADE;
 DROP TABLE IF EXISTS Person CASCADE;
 DROP TABLE IF EXISTS Department CASCADE;
+
 
 -- ==========================================================
 -- Department
@@ -13,6 +16,7 @@ DROP TABLE IF EXISTS Department CASCADE;
 CREATE TABLE Department (
     dept_identifier SERIAL PRIMARY KEY,
     dept_name       VARCHAR(50) NOT NULL UNIQUE
+    -- manager_id läggs till senare när Employee-tabellen finns (för att undvika cirkulära FK)
 );
 
 -- ==========================================================
@@ -42,12 +46,13 @@ CREATE TABLE Employee (
     employee_id      SERIAL PRIMARY KEY,
     email            VARCHAR(255) NOT NULL,
     salary           NUMERIC(10,2) CHECK (salary > 0),
-    manager_id       INT REFERENCES Employee(employee_id), 
+    manager_id       INT REFERENCES Employee(employee_id), -- själv-referens för chef
     dept_identifier  INT REFERENCES Department(dept_identifier),
     job_title_id     INT REFERENCES job_title(job_title_id),
     personal_number  VARCHAR(20) REFERENCES Person(personal_number)
 );
 
+-- Lägg till manager_id i Department nu när Employee finns (valfritt, NULL tillåts)
 ALTER TABLE Department
 ADD COLUMN manager_id INT REFERENCES Employee(employee_id);
 
@@ -64,7 +69,7 @@ CREATE TABLE CourseLayout (
     start_date      DATE NOT NULL,
     end_date        DATE NOT NULL,
     hp              NUMERIC(4,1) CHECK (hp > 0),
-    employee_id     INT REFERENCES Employee(employee_id) 
+    employee_id     INT REFERENCES Employee(employee_id) -- ansvarig lärare/anställd
 );
 
 -- ==========================================================
@@ -75,7 +80,7 @@ CREATE TABLE CourseInstance (
     courselayout_id   INT NOT NULL REFERENCES CourseLayout(courselayout_id),
     study_period      VARCHAR(2) CHECK (study_period IN ('P1','P2','P3','P4')),
     year              INT NOT NULL,
-    version_number    INT NOT NULL,
+    version_number    INT NOT NULL, -- versionsnumret för den här instansen (kan valideras i appnivå)
     course_code       VARCHAR(7) NOT NULL REFERENCES CourseLayout(course_code),
     num_students      INT CHECK (num_students >= 0)
 );
