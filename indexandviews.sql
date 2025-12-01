@@ -2,7 +2,7 @@ CREATE INDEX IF NOT EXISTS idx_employee_dept ON Employee(dept_identifier);
 CREATE INDEX IF NOT EXISTS idx_employee_email ON Employee(email);
 CREATE INDEX IF NOT EXISTS idx_ci_layout ON CourseInstance(courselayout_id);
 CREATE INDEX IF NOT EXISTS idx_ci_year_period ON CourseInstance(year, period);
-CREATE INDEX IF NOT EXISTS idx_p  in a_instance ON PlannedActivity(courseinstance_id);
+CREATE INDEX IF NOT EXISTS idx_pa_instance ON PlannedActivity(courseinstance_id);
 CREATE INDEX IF NOT EXISTS idx_pa_activity ON PlannedActivity(activitytype_id);
 CREATE INDEX IF NOT EXISTS idx_alloc_instance ON Allocation(courseinstance_id);
 CREATE INDEX IF NOT EXISTS idx_alloc_emp ON Allocation(employee_id);
