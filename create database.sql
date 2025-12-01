@@ -69,7 +69,8 @@ CREATE TABLE CourseLayout (
     start_date      DATE NOT NULL,
     end_date        DATE NOT NULL,
     hp              NUMERIC(4,1) CHECK (hp > 0),
-    employee_id     INT REFERENCES Employee(employee_id) -- ansvarig lärare/anställd
+    employee_id     INT REFERENCES Employee(employee_id), -- ansvarig lärare/anställd
+	UNIQUE(course_code, version_number)
 );
 
 -- ==========================================================
@@ -81,8 +82,9 @@ CREATE TABLE CourseInstance (
     study_period      VARCHAR(2) CHECK (study_period IN ('P1','P2','P3','P4')),
     year              INT NOT NULL,
     version_number    INT NOT NULL, -- versionsnumret för den här instansen (kan valideras i appnivå)
-    course_code       VARCHAR(7) NOT NULL REFERENCES CourseLayout(course_code),
-    num_students      INT CHECK (num_students >= 0)
+    num_students      INT CHECK (num_students >= 0),
+	course_code		  VARCHAR(7) NOT NULL,
+	FOREIGN KEY (course_code, version_number) REFERENCES CourseLayout(course_code, version_number)
 );
 
 -- ==========================================================
