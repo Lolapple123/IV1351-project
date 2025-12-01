@@ -1,8 +1,10 @@
+
+--first
 SELECT
 pb.course_code              AS "Course Code",
 pb.courseinstance_id        AS "Course Instance ID",
 pb.hp                       AS "HP",
-pb.period                   AS "Period",
+pb.study_period             AS "Period",
 pb.num_students             AS "# Students",
 pb.lecture_hours            AS "Lecture Hours",
 pb.tutorial_hours           AS "Tutorial Hours",
@@ -16,49 +18,77 @@ FROM v_planned_breakdown pb
 WHERE pb.year = 2025
 ORDER BY pb.course_code, pb.courseinstance_id;
 
+
+--second
 SELECT
-ab.course_code              AS "Course Code",
-ab.courseinstance_id        AS "Course Instance ID",
-ab.hp                       AS "HP",
-ab.teacher_name             AS "Teacher's Name",
-ab.job_title                AS "Designation",
-ab.lecture_hours            AS "Lecture Hours",
-ab.tutorial_hours           AS "Tutorial Hours",
-ab.lab_hours                AS "Lab Hours",
-ab.seminar_hours            AS "Seminar Hours",
-ab.overhead_hours           AS "Other Overhead Hours",
-ab.admin_hours              AS "Admin",
-ab.exam_hours               AS "Exam",
-ab.total_allocated_hours    AS "Total"
-FROM v_actual_breakdown ab
-WHERE ab.year = 2025
-ORDER BY ab.course_code, ab.courseinstance_id, ab.teacher_name;
+cl.course_code AS "Course Code",
+ci.courseinstance_id AS "Course Instance ID",
+cl.hp AS "HP",
+CONCAT(p.first_name, ' ', p.last_name) AS "Teacher's Name",
+jt.job_title AS "Designation",
+
+SUM(CASE WHEN at.activity_name = 'Lecture' THEN al.hoursallocated * at.factor ELSE 0 END) AS "Lecture Hours",
+SUM(CASE WHEN at.activity_name = 'Tutorial' THEN al.hoursallocated * at.factor ELSE 0 END) AS "Tutorial Hours",
+SUM(CASE WHEN at.activity_name = 'Lab' THEN al.hoursallocated * at.factor ELSE 0 END) AS "Lab Hours",
+SUM(CASE WHEN at.activity_name = 'Seminar' THEN al.hoursallocated * at.factor ELSE 0 END) AS "Seminar Hours",
+SUM(CASE WHEN at.activity_name = 'Overhead' THEN al.hoursallocated * at.factor ELSE 0 END) AS "Other Overhead Hours",
+SUM(CASE WHEN at.activity_name = 'Admin' THEN al.hoursallocated * at.factor ELSE 0 END) AS "Admin",
+SUM(CASE WHEN at.activity_name = 'Exam' THEN al.hoursallocated * at.factor ELSE 0 END) AS "Exam",
+SUM(al.hoursallocated * at.factor) AS "Total"
+FROM Allocation al
+JOIN PlannedActivity pa ON al.courseinstance_id = pa.courseinstance_id
+JOIN ActivityType at ON pa.activitytype_id = at.activitytype_id
+JOIN CourseInstance ci ON al.courseinstance_id = ci.courseinstance_id
+JOIN CourseLayout cl ON ci.courselayout_id = cl.courselayout_id
+JOIN Employee e ON al.employee_id = e.employee_id
+JOIN Person p ON e.personal_number = p.personal_number
+JOIN Job_Title jt ON e.job_title_id = jt.job_title_id
+WHERE ci.year = 2025
+
+
+GROUP BY cl.course_code, ci.courseinstance_id, cl.hp, p.first_name, p.last_name, jt.job_title
+ORDER BY cl.course_code, ci.courseinstance_id, "Teacher's Name";
+
+
+--third
 
 SELECT
-ab.course_code              AS "Course Code",
-ab.courseinstance_id        AS "Course Instance ID",
-ab.hp                       AS "HP",
-ab.period                   AS "Period",
-ab.teacher_name             AS "Teacher's Name",
-ab.lecture_hours            AS "Lecture Hours",
-ab.tutorial_hours           AS "Tutorial Hours",
-ab.lab_hours                AS "Lab Hours",
-ab.seminar_hours            AS "Seminar Hours",
-ab.overhead_hours           AS "Other Overhead Hours",
-ab.admin_hours              AS "Admin",
-ab.exam_hours               AS "Exam",
-ab.total_allocated_hours    AS "Total"
-FROM v_actual_breakdown ab
-WHERE ab.year = 2025
-AND ab.employee_id = 500001
-ORDER BY ab.period, ab.course_code;
+CONCAT(p.first_name, ' ', p.last_name) AS "Teacher's Name",
+jt.job_title AS "Designation",
+-- Sum of hours by activity type across all course instances for this teacher
+SUM(CASE WHEN at.activity_name = 'Lecture' THEN al.hoursallocated * at.factor ELSE 0 END) AS "Lecture Hours",
+SUM(CASE WHEN at.activity_name = 'Tutorial' THEN al.hoursallocated * at.factor ELSE 0 END) AS "Tutorial Hours",
+SUM(CASE WHEN at.activity_name = 'Lab' THEN al.hoursallocated * at.factor ELSE 0 END) AS "Lab Hours",
+SUM(CASE WHEN at.activity_name = 'Seminar' THEN al.hoursallocated * at.factor ELSE 0 END) AS "Seminar Hours",
+SUM(CASE WHEN at.activity_name = 'Overhead' THEN al.hoursallocated * at.factor ELSE 0 END) AS "Other Overhead Hours",
+SUM(CASE WHEN at.activity_name = 'Admin' THEN al.hoursallocated * at.factor ELSE 0 END) AS "Admin",
+SUM(CASE WHEN at.activity_name = 'Exam' THEN al.hoursallocated * at.factor ELSE 0 END) AS "Exam",
+SUM(al.hoursallocated * at.factor) AS "Total Hours"
+FROM Allocation al
+JOIN PlannedActivity pa ON al.courseinstance_id = pa.courseinstance_id
+JOIN ActivityType at ON pa.activitytype_id = at.activitytype_id
+JOIN Employee e ON al.employee_id = e.employee_id
+JOIN Person p ON e.personal_number = p.personal_number
+JOIN Job_Title jt ON e.job_title_id = jt.job_title_id
+JOIN CourseInstance ci ON al.courseinstance_id = ci.courseinstance_id
+WHERE ci.year = 2025
+GROUP BY p.first_name, p.last_name, jt.job_title
+ORDER BY "Total Hours" DESC, "Teacher's Name";
 
-SELECT
-tic.employee_id        AS "Employment ID",
-tic.teacher_name       AS "Teacher's Name",
-tic.period             AS "Period",
-tic.num_instances      AS "No of courses"
-FROM v_teacher_instance_count tic
-WHERE tic.year = 2025
-AND tic.num_instances = 1
-ORDER BY tic.num_instances DESC, tic.teacher_name;
+
+--fourth
+
+SELECT e.employee_id,
+       p.first_name || ' ' || p.last_name AS employee_name,
+       COUNT(DISTINCT a.courseinstance_id) AS course_count
+FROM Employee e
+JOIN Person p ON e.personal_number = p.personal_number
+JOIN Allocation a ON e.employee_id = a.employee_id
+JOIN CourseInstance ci ON a.courseinstance_id = ci.courseinstance_id
+WHERE ci.study_period = 'P1'   -- replace with your current period
+GROUP BY e.employee_id, p.first_name, p.last_name
+HAVING COUNT(DISTINCT a.courseinstance_id) > 4;  -- replace 4 with your threshold
+
+
+
+
