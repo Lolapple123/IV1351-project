@@ -62,7 +62,7 @@ ADD COLUMN manager_id INT REFERENCES Employee(employee_id);
 CREATE TABLE CourseLayout (
     courselayout_id SERIAL PRIMARY KEY,
     version_number  INT NOT NULL DEFAULT 1,
-    course_code     VARCHAR(7) NOT NULL UNIQUE,
+    course_code     VARCHAR(7) NOT NULL,
     course_name     VARCHAR(100) NOT NULL,
     min_students    INT CHECK (min_students >= 0),
     max_students    INT CHECK (max_students >= min_students),
