@@ -3,57 +3,69 @@ import model.CourseInstance;
 import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
+
 public class CourseDAO {
+
     public List<CourseInstance> getAllInstances() {
-        List<CourseInstance> out = new ArrayList<>();
-        String sql = "SELECT ci.instance_id, ci.period, ci.year, ci.num_students " +
-                "FROM CourseInstance ci JOIN CourseLayout cl ON ci.layout_id = cl.layout_id " +
-                "ORDER BY ci.year DESC, ci.period, ci.instance_id";
+        List<CourseInstance> list = new ArrayList<>();
+        String sql = "SELECT ci.courseinstance_id, cl.course_code, cl.course_name, ci.study_period, ci.year, ci.num_students " +
+                     "FROM CourseInstance ci " +
+                     "JOIN CourseLayout cl ON ci.courselayout_id = cl.courselayout_id " +
+                     "ORDER BY ci.year DESC, ci.study_period, ci.courseinstance_id";
+
         try (Connection c = DATABASEconnect.getConnection();
-                Statement s = c.createStatement();
-                ResultSet rs = s.executeQuery(sql)) {
+             PreparedStatement ps = c.prepareStatement(sql);
+             ResultSet rs = ps.executeQuery()) {
+
             while (rs.next()) {
-                out.add(new CourseInstance(
-                        rs.getInt("instance_id"),
-                        rs.getString("period"),
+                list.add(new CourseInstance(
+                        rs.getInt("courseinstance_id"),
+                        rs.getString("course_code"),
+                        rs.getString("course_name"),
+                        rs.getString("study_period"),
                         rs.getInt("year"),
-                        rs.getInt("num_students")));
-            }
-        } catch (Exception e) {
-            System.out.println("Error: " + e.getMessage());
+                        rs.getInt("num_students")
+                )); }
+        } catch (SQLException e) {
+            System.out.println("Error fetching course instances: " + e.getMessage());
         }
-        return out;
+        return list;
     }
-    public CourseInstance lockAndGetCourseInstance(int instanceId) throws SQLException {
-        String sql = "SELECT ci.instance_id, ci.period, ci.year, ci.num_students " +
-                "FROM CourseInstance ci JOIN CourseLayout cl ON ci.layout_id = cl.layout_id " +
-                "WHERE ci.instance_id = ? FOR UPDATE";
+    public CourseInstance lockAndGetCourseInstance(int instanceId) {
+        String sql = "SELECT ci.courseinstance_id, cl.course_code, cl.course_name, ci.study_period, ci.year, ci.num_students " +
+                     "FROM CourseInstance ci " +
+                     "JOIN CourseLayout cl ON ci.courselayout_id = cl.courselayout_id " +
+                     "WHERE ci.courseinstance_id = ? FOR UPDATE";
+
         try (Connection c = DATABASEconnect.getConnection();
-                PreparedStatement ps = c.prepareStatement(sql)) {
+             PreparedStatement ps = c.prepareStatement(sql)) {
+
             ps.setInt(1, instanceId);
             try (ResultSet rs = ps.executeQuery()) {
                 if (rs.next()) {
                     return new CourseInstance(
                             rs.getInt("courseinstance_id"),
+                            rs.getString("course_code"),
+                            rs.getString("course_name"),
                             rs.getString("study_period"),
                             rs.getInt("year"),
-                            rs.getInt("num_students"));
-                } } }  return null; }
-    public void increaseStudents(int instanceId, int delta) throws SQLException {
-        String sql = "UPDATE CourseInstance SET num_students = num_students + ? WHERE instance_id = ?";
+                            rs.getInt("num_students")
+                    );}}
+        } catch (SQLException e) {
+            System.out.println("Error locking/getting course instance: " + e.getMessage());
+        }
+        return null;
+    }
+
+    public void increaseStudents(int instanceId, int delta) {
+        String sql = "UPDATE CourseInstance SET num_students = num_students + ? WHERE courseinstance_id = ?";
         try (Connection c = DATABASEconnect.getConnection();
-                PreparedStatement ps = c.prepareStatement(sql)) {
+             PreparedStatement ps = c.prepareStatement(sql)) {
+
             ps.setInt(1, delta);
             ps.setInt(2, instanceId);
             ps.executeUpdate();
-        }  }
-    public String[] getCourseCodeAndPeriod(int instanceId) throws SQLException {
-        String sql = "SELECT ci.period FROM CourseInstance ci JOIN CourseLayout cl ON ci.layout_id = cl.layout_id WHERE ci.instance_id = ?";
-        try (Connection c = DATABASEconnect.getConnection();
-                PreparedStatement ps = c.prepareStatement(sql)) {
-            ps.setInt(1, instanceId);
-            try (ResultSet rs = ps.executeQuery()) {
-                if (rs.next()) {
-                    return new String[] { rs.getString(1), rs.getString(2) };
-                } } }
-        return null; } }
+
+        } catch (SQLException e) {
+            System.out.println("Error increasing students: " + e.getMessage());
+        }}}
