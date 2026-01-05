@@ -1,5 +1,5 @@
 import dao.*;
-import model.*;
+import Models.*;
 import service.CourseService;
 
 import java.util.List;
