@@ -1,5 +1,5 @@
 -- ==========================================================
---  FULL DATABASE SCRIPT FOR THE 3.1 DATA MODEL (CORRECTED)
+--  FULL DATABASE SCRIPT FOR THE 3.1 DATA MODEL (CORRECTED ORDER)
 -- ==========================================================
 
 -- Drop tables if they exist (cascade for dependencies)
@@ -13,14 +13,23 @@ DROP TABLE IF EXISTS JobTitle CASCADE;
 DROP TABLE IF EXISTS Employee CASCADE;
 DROP TABLE IF EXISTS Person CASCADE;
 DROP TABLE IF EXISTS Department CASCADE;
+DROP TABLE IF EXISTS Config CASCADE;
 
 -- ==========================================================
--- Department
+-- JobTitle
+-- ==========================================================
+CREATE TABLE JobTitle (
+    job_title_id SERIAL PRIMARY KEY,
+    title_name   VARCHAR(50) NOT NULL UNIQUE
+);
+
+-- ==========================================================
+-- Department (manager_id FK added later)
 -- ==========================================================
 CREATE TABLE Department (
     dept_identifier SERIAL PRIMARY KEY,
     dept_name       VARCHAR(50) NOT NULL UNIQUE,
-    manager_id      INT REFERENCES Employee(employee_id)
+    manager_id      INT
 );
 
 -- ==========================================================
@@ -36,14 +45,6 @@ CREATE TABLE Person (
 );
 
 -- ==========================================================
--- JobTitle
--- ==========================================================
-CREATE TABLE JobTitle (
-    job_title_id SERIAL PRIMARY KEY,
-    title_name   VARCHAR(50) NOT NULL UNIQUE
-);
-
--- ==========================================================
 -- Employee
 -- ==========================================================
 CREATE TABLE Employee (
@@ -53,6 +54,13 @@ CREATE TABLE Employee (
     personal_number VARCHAR(20) NOT NULL UNIQUE,
     job_title_id    INT REFERENCES JobTitle(job_title_id)
 );
+
+-- ==========================================================
+-- Add manager_id foreign key after Employee exists
+-- ==========================================================
+ALTER TABLE Department
+ADD CONSTRAINT fk_manager
+FOREIGN KEY (manager_id) REFERENCES Employee(employee_id);
 
 -- ==========================================================
 -- Employee_Salary
@@ -112,7 +120,7 @@ CREATE TABLE PlannedActivity (
 );
 
 -- ==========================================================
--- Allocation
+-- Allocation (linked to PlannedActivity)
 -- ==========================================================
 CREATE TABLE Allocation (
     allocation_id       SERIAL PRIMARY KEY,
@@ -122,8 +130,23 @@ CREATE TABLE Allocation (
 );
 
 -- ==========================================================
+-- Config table for dynamic limits
+-- ==========================================================
+CREATE TABLE Config (
+    config_key   VARCHAR(50) PRIMARY KEY,
+    config_value INT NOT NULL
+);
+
+-- ==========================================================
 -- Insert sample data
 -- ==========================================================
+
+-- Job Titles
+INSERT INTO JobTitle(title_name) VALUES
+('Professor'),
+('Senior Lecturer'),
+('Lecturer'),
+('Assistant');
 
 -- Departments
 INSERT INTO Department (dept_name) VALUES
@@ -139,13 +162,6 @@ VALUES
 ('Brian', 'Karlsson', '070-1000004', 'KTH Campus', '900101-0004'),
 ('Adam',  'West',     '070-1000005', 'KTH Campus', '900101-0005');
 
--- Job Titles
-INSERT INTO JobTitle(title_name) VALUES
-('Professor'),
-('Senior Lecturer'),
-('Lecturer'),
-('Assistant');
-
 -- Employees
 INSERT INTO Employee(email, dept_identifier, personal_number, job_title_id)
 VALUES
@@ -155,7 +171,7 @@ VALUES
 ('brian@kth.se', 1, '900101-0004', 4),
 ('adam@kth.se',  1, '900101-0005', 4);
 
--- Assign Department Managers (after employees exist)
+-- Assign Department Managers
 UPDATE Department SET manager_id = 1 WHERE dept_identifier = 1;
 UPDATE Department SET manager_id = 2 WHERE dept_identifier = 2;
 
@@ -168,7 +184,7 @@ VALUES
 (4, 30000, '2024-01-01', NULL),
 (5, 25000, '2024-01-01', NULL);
 
--- CourseLayout (VERSIONED)
+-- CourseLayout
 INSERT INTO CourseLayout(course_code, version_number, course_name, min_students, max_students, start_date, end_date, hp)
 VALUES
 ('IV1351', 1, 'Data Storage Paradigms', 50, 250, '2024-01-01', '2024-06-01', 7.5),
@@ -221,7 +237,7 @@ VALUES
 (3, 6, 141),
 (3, 7, 73);
 
--- Allocation (linked to PlannedActivity)
+-- Allocation
 INSERT INTO Allocation(employee_id, planned_activity_id, hoursallocated)
 VALUES
 -- Paris
@@ -249,25 +265,16 @@ VALUES
 (5, 3, 50),
 (5, 4, 50);
 
--- ==========================================================
--- Config table for dynamic limits
--- ==========================================================
-CREATE TABLE Config (
-    config_key   VARCHAR(50) PRIMARY KEY,
-    config_value INT NOT NULL
-);
-
--- Insert max courses per period
+-- Config table for max courses per period
 INSERT INTO Config(config_key, config_value) VALUES ('max_courses_per_period', 4);
 
--- ==========================================================
 -- Query to check employees exceeding max courses per period
--- ==========================================================
 SELECT a.employee_id,
        ci.study_period,
-       COUNT(DISTINCT a.courseinstance_id) AS course_count
+       COUNT(DISTINCT pa.courseinstance_id) AS course_count
 FROM Allocation a
-JOIN CourseInstance ci ON a.courseinstance_id = ci.courseinstance_id
+JOIN PlannedActivity pa ON a.planned_activity_id = pa.planned_activity_id
+JOIN CourseInstance ci ON pa.courseinstance_id = ci.courseinstance_id
 GROUP BY a.employee_id, ci.study_period
-HAVING COUNT(DISTINCT a.courseinstance_id) >
+HAVING COUNT(DISTINCT pa.courseinstance_id) >
        (SELECT config_value FROM Config WHERE config_key = 'max_courses_per_period');
