@@ -185,19 +185,22 @@ VALUES
 (5, 25000, '2024-01-01', NULL);
 
 -- ==========================================================
--- CourseLayout including new courses
+-- CourseLayout
 -- ==========================================================
+
 INSERT INTO CourseLayout(course_code, version_number, course_name, min_students, max_students, start_date, end_date, hp)
 VALUES
 ('IV1351', 1, 'Data Storage Paradigms', 50, 250, '2024-01-01', '2024-06-01', 7.5),
 ('IV1351', 2, 'Data Storage Paradigms', 50, 250, '2024-01-01', '2024-06-01', 15.0),
 ('IX1500', 1, 'Discrete Mathematics', 50, 150, '2024-01-01', '2024-06-01', 7.5),
-('IS1200',   1, 'Computer Hardware',   50, 200, '2024-01-01', '2024-06-01', 6.0),
-('IS1300',   1, 'Embedded Systems',   50, 180, '2024-01-01', '2024-06-01', 6.0),
-('SF1264', 1, 'Calculus',           50, 150, '2024-01-01', '2024-06-01', 7.5);
+('IS1200', 1, 'Computer Hardware',   50, 200, '2024-01-01', '2024-06-01', 6.0),
+('IS1300', 1, 'Embedded Systems',   50, 180, '2024-01-01', '2024-06-01', 6.0),
+('SF1264', 1, 'Calculus',           50, 150, '2024-01-01', '2024-06-01', 7.5),
+('IS1246', 1, 'Digital Design',      50, 100, '2024-01-01', '2024-06-01', 5.0),
+('SF1625', 1, 'Linear Algebra',   50, 100, '2024-01-01', '2024-06-01', 5.0);
 
 -- ==========================================================
--- CourseInstance including new courses
+-- CourseInstance
 -- ==========================================================
 INSERT INTO CourseInstance(courselayout_id, study_period, year, num_students)
 VALUES
@@ -206,7 +209,9 @@ VALUES
 (3, 'P1', 2025, 150),
 (4, 'P1', 2025, 100),  -- Computer Hardware
 (5, 'P2', 2025, 120),  -- Embedded Systems
-(6, 'P3', 2025, 130);  -- Calculus
+(6, 'P3', 2025, 130),  -- Calculus
+(7, 'P1', 2025, 80),   
+(8, 'P1', 2025, 90); 
 
 -- ==========================================================
 -- ActivityType
