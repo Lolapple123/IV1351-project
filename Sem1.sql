@@ -1,5 +1,5 @@
 -- ==========================================================
---  FULL DATABASE SCRIPT FOR THE 3.1 DATA MODEL (CORRECTED ORDER)
+--  FULL DATABASE SCRIPT WITH NEW COURSES
 -- ==========================================================
 
 -- Drop tables if they exist (cascade for dependencies)
@@ -184,21 +184,33 @@ VALUES
 (4, 30000, '2024-01-01', NULL),
 (5, 25000, '2024-01-01', NULL);
 
--- CourseLayout
+-- ==========================================================
+-- CourseLayout including new courses
+-- ==========================================================
 INSERT INTO CourseLayout(course_code, version_number, course_name, min_students, max_students, start_date, end_date, hp)
 VALUES
 ('IV1351', 1, 'Data Storage Paradigms', 50, 250, '2024-01-01', '2024-06-01', 7.5),
 ('IV1351', 2, 'Data Storage Paradigms', 50, 250, '2024-01-01', '2024-06-01', 15.0),
-('IX1500', 1, 'Discrete Mathematics',    50, 150, '2024-01-01', '2024-06-01', 7.5);
+('IX1500', 1, 'Discrete Mathematics', 50, 150, '2024-01-01', '2024-06-01', 7.5),
+('IS1200',   1, 'Computer Hardware',   50, 200, '2024-01-01', '2024-06-01', 6.0),
+('IS1300',   1, 'Embedded Systems',   50, 180, '2024-01-01', '2024-06-01', 6.0),
+('SF1264', 1, 'Calculus',           50, 150, '2024-01-01', '2024-06-01', 7.5);
 
--- CourseInstance
+-- ==========================================================
+-- CourseInstance including new courses
+-- ==========================================================
 INSERT INTO CourseInstance(courselayout_id, study_period, year, num_students)
 VALUES
 (1, 'P1', 2025, 200),
 (2, 'P2', 2025, 220),
-(3, 'P1', 2025, 150);
+(3, 'P1', 2025, 150),
+(4, 'P1', 2025, 100),  -- Computer Hardware
+(5, 'P2', 2025, 120),  -- Embedded Systems
+(6, 'P3', 2025, 130);  -- Calculus
 
+-- ==========================================================
 -- ActivityType
+-- ==========================================================
 INSERT INTO ActivityType(activity_name, factor)
 VALUES
 ('Lecture', 1.0),
@@ -209,66 +221,52 @@ VALUES
 ('Admin', 1.0),
 ('Exam', 1.0);
 
--- PlannedActivity
+-- ==========================================================
+-- PlannedActivity (simplified for all courses)
+-- ==========================================================
+-- Original 3 courses plus new 3 courses
 INSERT INTO PlannedActivity(courseinstance_id, activitytype_id, planned_hours)
 VALUES
--- Instance 1: IV1351 (P1)
+-- IV1351 P1
 (1, 1, 72),
 (1, 2, 192),
 (1, 3, 96),
-(1, 4, 144),
-(1, 5, 650),
-(1, 6, 177),
-(1, 7, 83),
--- Instance 2: IV1351 (P2)
+-- IV1351 P2
 (2, 1, 100),
 (2, 2, 250),
 (2, 3, 140),
-(2, 4, 200),
-(2, 5, 750),
-(2, 6, 190),
-(2, 7, 90),
--- Instance 3: IX1500
+-- IX1500 P1
 (3, 1, 159),
-(3, 2, 0),
-(3, 3, 0),
 (3, 4, 116),
-(3, 5, 270),
-(3, 6, 141),
-(3, 7, 73);
+-- Computer Hardware P1
+(4, 1, 80),
+(4, 2, 120),
+-- Embedded Systems P2
+(5, 1, 90),
+(5, 3, 60),
+-- Calculus P3
+(6, 1, 100),
+(6, 2, 50);
 
--- Allocation
+-- ==========================================================
+-- Allocation (sample to test teaching load)
+-- ==========================================================
 INSERT INTO Allocation(employee_id, planned_activity_id, hoursallocated)
 VALUES
--- Paris
-(1, 1, 72),
-(1, 5, 100),
-(1, 6, 43),
-(1, 7, 61),
--- Leif
-(2, 4, 64),
-(2, 5, 100),
-(2, 7, 62),
--- Niharika
-(3, 4, 64),
-(3, 5, 100),
-(3, 6, 43),
-(3, 7, 61),
-(3, 15, 159),
-(3, 19, 100),
-(3, 20, 141),
-(3, 21, 73),
--- Brian
-(4, 3, 50),
-(4, 5, 100),
--- Adam
-(5, 3, 50),
-(5, 4, 50);
+-- Paris assigned 4 courses to test 4-course limit
+(1, 1, 72),   -- IV1351 P1 Lecture
+(1, 2, 192),  -- IV1351 P1 Tutorial
+(1, 10, 80),  -- Computer Hardware P1 Lecture
+(1, 13, 90);  -- Embedded Systems P2 Lecture
 
+-- ==========================================================
 -- Config table for max courses per period
+-- ==========================================================
 INSERT INTO Config(config_key, config_value) VALUES ('max_courses_per_period', 4);
 
+-- ==========================================================
 -- Query to check employees exceeding max courses per period
+-- ==========================================================
 SELECT a.employee_id,
        ci.study_period,
        COUNT(DISTINCT pa.courseinstance_id) AS course_count
