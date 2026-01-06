@@ -5,7 +5,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 
 import dao.*;
-import model.CourseInstance;
+import models.CourseInstance;
 
 public class CourseService {
 
