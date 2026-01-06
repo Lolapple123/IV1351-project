@@ -1,5 +1,5 @@
 package dao;
-import model.CourseInstance;
+import models.CourseInstance;
 import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
