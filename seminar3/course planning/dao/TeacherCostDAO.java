@@ -1,6 +1,6 @@
 package dao;
 
-import model.CostTeaching;
+import models.CostTeaching;
 import java.sql.*;
 
 public class TeachingCostDAO {
