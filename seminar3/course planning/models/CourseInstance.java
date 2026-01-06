@@ -1,4 +1,4 @@
-package model;
+package models;
 
 public class CourseInstance {
     public int instanceId;
