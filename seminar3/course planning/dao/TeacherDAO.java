@@ -1,6 +1,6 @@
 package dao;
 
-import model.Teacher;
+import models.Teacher;
 import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
